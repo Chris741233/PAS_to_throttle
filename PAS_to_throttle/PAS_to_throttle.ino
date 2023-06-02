@@ -4,11 +4,12 @@ Project     :
 Libraries   :
 Author      :  Chris74
 
-Description :  PAS to throttle v1
+Description :  e-bike PAS to Throttle 
 
-Github (code, infos and more) : 
+Github (code, infos and more) :  https://github.com/Chris741233/PAS_to_throttle
 
-Forum Cyclurba :
+
+Forum Cyclurba : https://cyclurba.fr/forum/742211/arduino-l-assistance-d-un-vae.html?discussionID=31032#msg742211
 
 
 ******************************************************************/
@@ -27,16 +28,18 @@ const int PWM_PIN = 10;  // PWM output pin
 
 // -------- SETTING CONSTANTS (if var float use decimal !) ------------------------
 
-#define USE_PRPORTIONAL     1   // use proportional assistance ? 1=yes, 0=no (if no, use only On-Off assistance with full PWM)
+#define USE_PRPORTIONAL     0   // use proportional assistance ? 1=yes, 0=no (if no, use only On-Off assistance with full PWM)
 #define INVERSE_ASSISTANCE  0   // if proportional, inverse assistance ? 1=yes, 0=no (if yes, less RPM = more assistance !)
 
-const float V_REF = 4.80;       // Arduino +5V pin reference (=PWM level high) - To test! (default 5.00)
+const float V_REF = 5.00;       // Arduino +5V pin reference (=PWM level high) - To test! (default 5.00)
 const float V_MIN_THR = 1.10;   // throttle min voltage, default 1.1V --- no push
 const float V_MAX_THR = 3.60;   // throttle max voltage, default 3.6V --- full  push
 
-const int NB_MAGNETS =  8;      // How many magnets on PAS ?  (default 6)
+const int NB_MAGNETS =  6;      // How many magnets on PAS ?  (default 6)
 
 const int RPM_TO_START = 10;    // How many RPM to start assistance ? (with default 10, start is normally fast enough)
+// more rpm = less ms !
+
 const int START_PULSES  = 0;    // Number of pulses (of magnet) needed before turning On (0 = fastest)
 
 // for maping proportional value, cf map() in void turnOn()
@@ -44,19 +47,18 @@ const int RPM_MIN = 20;         // min rpm  (default 20rpm)
 const int RPM_MAX = 60;         // max rpm  (default 60rpm)
 
 
-
 // ********** Calculation (don't modif) *********
 // -----------------------------------------
 const int MIN_PWM  = V_MIN_THR/V_REF * 255;  // expl:  1.1V / 5.0V * 255 = PWM 56.1 (int 56)  
-const int MAX_PWM = V_MAX_THR/V_REF * 255;  // expl:  3.4V / 5.0V * 255 = PWM 173.4 (int 173)
+const int MAX_PWM = V_MAX_THR/V_REF * 255;   // expl:  3.4V / 5.0V * 255 = PWM 173.4 (int 173)
 // PWM 8bit = 5V/255 = 19mV  precision ...
 
-const long COEFF_RPM = 60000 / NB_MAGNETS;  // 60000 / 6 magnets  = 10000  (1 minute=60000ms)
+const long COEFF_RPM = 60000 / NB_MAGNETS;               // 60000 / 6 magnets  = 10000  (1 minute=60000ms)
 
-const long MS_TO_START = 60000 / RPM_TO_START / NB_MAGNETS;  // result en ms. Expl 10rpm and 8 magnets = 750ms
+const long MS_TO_START = 60000/NB_MAGNETS/RPM_TO_START;  // result en ms. Expl 10rpm and 6 magnets = 1000ms (1s)
 
-const long MS_SLOW = 60000 / RPM_MIN / NB_MAGNETS; // for maping proportional value
-const long MS_FAST = 60000 / RPM_MAX / NB_MAGNETS; // for maping proportional value
+const long MS_SLOW = 60000 / RPM_MIN / NB_MAGNETS;       // for maping proportional value
+const long MS_FAST = 60000 / RPM_MAX / NB_MAGNETS;       // for maping proportional value
 
 
 // timer loop
