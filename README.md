@@ -10,6 +10,14 @@
 
 ---
 
+ #### Wiring (Arduino Uno/Nano)
+
+<p align="left">
+  <img src="./PAS_to_throttle/img/diagram_PAS_to_throttle.jpg" width="700" title="Arduino pinouts">
+</p>
+
+---
+
 #### Utilisation
 Régler les constantes en début de code \
 *Adjust constants at the beginning of code*
@@ -36,13 +44,6 @@ const int RPM_MIN = 20;         // min rpm  (default 20rpm)
 const int RPM_MAX = 60;         // max rpm  (default 60rpm)
 
 ```
-
- 
- #### Wiring (Arduino Uno/Nano)
-
-<p align="left">
-  <img src="./PAS_to_throttle/img/diagram_PAS_to_throttle.jpg" width="700" title="Arduino pinouts">
-</p>
 
 #### Oscillo and debug Serial
 <p align="left">
