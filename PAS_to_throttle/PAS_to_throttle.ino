@@ -6,8 +6,6 @@ Author      :  Chris74
 
 Description :  e-bike PAS to Throttle 
 
-Description :  e-bike PAS to Throttle 
-
 *** Github (this code, infos and more) :  https://github.com/Chris741233/PAS_to_throttle
 
 
