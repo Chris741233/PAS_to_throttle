@@ -1,13 +1,12 @@
 # E-bike PAS to throttle converter
- E-bike PAS to throttle converter
- 
+ Conversion de la sortie PAS vers l'entrée throttle (gachette / accélérateur)   
  Code pour Aduino Nano/Uno (signal +5V)
 
 **see also**  
 - [PAS analyzer](https://github.com/Chris741233/PAS_analyzer)
 - [Throttle to PAS](https://github.com/Chris741233/throttle-to-PAS)
 - [Button to PAS (with cruise in option)](https://github.com/Chris741233/button-to-PAS)
-
+0
 ---
 
  #### Wiring (Arduino Uno/Nano)
