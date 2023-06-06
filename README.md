@@ -54,3 +54,8 @@ const int RPM_MAX = 60;         // max rpm  (default 60rpm)
 <p align="left">
   <img src="./PAS_to_throttle/img/oscillo_60_rpm_2.jpg" width="700" title="Oscillo">
 </p>
+
+---
+
+#### Discussion sur le forum Cyclurba :
+[Cyclurba](https://cyclurba.fr/forum/forum_discussion.php?from=41&messageID=742211#)
