@@ -6,10 +6,16 @@ Author      :  Chris74
 
 Description :  e-bike PAS to Throttle 
 
-Github (code, infos and more) :  https://github.com/Chris741233/PAS_to_throttle
+Description :  e-bike PAS to Throttle 
+
+*** Github (this code, infos and more) :  https://github.com/Chris741233/PAS_to_throttle
 
 
-Forum Cyclurba : https://cyclurba.fr/forum/742211/arduino-l-assistance-d-un-vae.html?discussionID=31032#msg742211
+- Forum Cyclurba : https://cyclurba.fr/forum/742211/arduino-l-assistance-d-un-vae.html?discussionID=31032#msg742211
+
+- Doc PAS ebikes.ca (Signal Types for Basic PAS Sensors) https://ebikes.ca/learn/pedal-assist.html
+
+- Divers : RC Low-pass Filter Design Tool http://sim.okawa-denshi.jp/en/CRtool.php
 
 
 ******************************************************************/
