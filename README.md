@@ -1,7 +1,8 @@
 # E-bike PAS to throttle converter
- Conversion de la sortie PAS vers l'entrée throttle (gachette / accélérateur).  
- Possibilité d'utiliser ou non l'assistance proportionnelle en fonction de la vitesse de pédalage.  
-En option inversersion de l'aide  = Plus d'aide en pédalage lent que rapide !  
+- Conversion de la sortie PAS vers l'entrée throttle (gachette / accélérateur).  
+- Possibilité d'utiliser ou non l'assistance proportionnelle en fonction de la vitesse de pédalage.  
+- En option inversersion de l'aide  = Plus d'aide en pédalage lent que rapide  
+- Le code vérifie le sens de pédalage (pas d'assistance en pédalage arrière !)
 
  Code pour Aduino Nano/Uno (signal +5V)
 
