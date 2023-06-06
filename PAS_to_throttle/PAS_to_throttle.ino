@@ -26,61 +26,63 @@ const int PWM_PIN = 10;  // PWM output pin
 
 
 
-// -------- SETTING CONSTANTS (if var float use decimal !) ------------------------
+// -------- SETTING CONSTANTS (if const float use decimal !) ------------------------
 
 #define USE_PRPORTIONAL     0   // use proportional assistance ? 1=yes, 0=no (if no, use only On-Off assistance with full PWM)
-#define INVERSE_ASSISTANCE  0   // if proportional, inverse assistance ? 1=yes, 0=no (if yes, less RPM = more assistance !)
+#define INVERSE_ASSISTANCE  0   // if proportional, inverse assistance ? 1=yes, 0=no (if yes, slow pedaling = more assistance !)
+// Si inverse, envois plus d'assistance en pédalage lent qu'en pedalage rapide !
 
-const float V_REF = 5.00;       // Arduino +5V pin reference (=PWM level high) - To test! (default 5.00)
-const float V_MIN_THR = 1.10;   // throttle min voltage, default 1.1V --- no push
-const float V_MAX_THR = 3.60;   // throttle max voltage, default 3.6V --- full  push
+const int  NB_MAGNETS =  6;     // How many magnets on PAS ?  (default 6)
 
-const int NB_MAGNETS =  6;      // How many magnets on PAS ?  (default 6)
+const float V_REF =     5.00;   // Arduino +5V pin reference (=PWM high level) - To test! (default 5.00)
+const float V_MIN_THR = 1.10;   // throttle min voltage (default 1.1V --- no push)
+const float V_MAX_THR = 3.60;   // throttle max voltage (default 3.6V --- full  push)
 
-const int RPM_TO_START = 10;    // How many RPM to start assistance ? (with default 10, start is normally fast enough)
-// more rpm = less ms !
+const int  RPM_TO_START = 10;   // How many RPM to start assistance ? (with default 10, start is normally fast enough)
+// --> more rpm = less ms 
 
-const int START_PULSES  = 0;    // Number of pulses (of magnet) needed before turning On (0 = fastest)
+const int START_PULSES  = 0;    // Number of pulses (magnet) needed before turning On (0 = fastest)
 
-// for maping proportional value, cf map() in void turnOn()
+// if use_proportional, RPM value for maping PWM out --> cf map() in void turnOn()
 const int RPM_MIN = 20;         // min rpm  (default 20rpm)
 const int RPM_MAX = 60;         // max rpm  (default 60rpm)
+
+// interval timer loop: Check RPM, Turn Off, and debug Serial 
+const int SCAN_INTERVAL = 250;   // default 250, if assistance cut too fast when stop pedaling, put const to ~500ms or 1000ms
 
 
 // ********** Calculation (don't modif) *********
 // -----------------------------------------
+const long MS_TO_START = 60000/NB_MAGNETS/RPM_TO_START;  // result en ms. Expl 10rpm and 6 magnets = 1000ms
+
 const int MIN_PWM  = V_MIN_THR/V_REF * 255;  // expl:  1.1V / 5.0V * 255 = PWM 56.1 (int 56)  
-const int MAX_PWM = V_MAX_THR/V_REF * 255;   // expl:  3.4V / 5.0V * 255 = PWM 173.4 (int 173)
+const int MAX_PWM = V_MAX_THR/V_REF * 255;   // expl:  3.6V / 5.0V * 255 = PWM 183.6 (int 183)
 // PWM 8bit = 5V/255 = 19mV  precision ...
 
 const long COEFF_RPM = 60000 / NB_MAGNETS;               // 60000 / 6 magnets  = 10000  (1 minute=60000ms)
-
-const long MS_TO_START = 60000/NB_MAGNETS/RPM_TO_START;  // result en ms. Expl 10rpm and 6 magnets = 1000ms (1s)
 
 const long MS_SLOW = 60000 / RPM_MIN / NB_MAGNETS;       // for maping proportional value
 const long MS_FAST = 60000 / RPM_MAX / NB_MAGNETS;       // for maping proportional value
 
 
-// timer loop
-const int SERIAL_INTERVAL = 2000;     // interval affichage Serial et infos, en ms, 1000 ou 2000
-// 1000 = affichage rapide, 2000 calcul RPM plus stable et précis
-
 
 // -------- GLOBAL VARIABLES ----------------------
 
-unsigned long previousMillis = 0;  // for timer loop (Serial info) 
+unsigned int rpm  = 0;          // RPM pedalling 
 
-unsigned int rpm      = 0;         // RPM pedalling 
+bool ped_forward = false;       // pedaling forward or backwards
 
-bool led_state = false;            // state led controle
+bool led_state = false;         // state led controle
 
 
-// -- var Interrupt
-unsigned long time_isr = 0;
-unsigned long lastTime = 0;
+// -- var Interrupt isr_pas
+unsigned long isr_oldtime = 0;
 
+volatile unsigned int period_h = 0;  // volatile obligatoire pour interupt si echange avec autres fonctions 
+volatile unsigned int period_l = 0;
 volatile unsigned int period = 0;
-volatile unsigned int pulse = 0;   // revolution count : Volatile obligatoire pour interupt si échange avec loop 
+
+volatile unsigned int pulse = 0;    // PAS pulse count 
 
 
 // -------- MAIN PROG ----------------------
@@ -93,10 +95,10 @@ void setup() {
     
     digitalWrite(LED_PIN, LOW);      // Led  Low au boot
     
-    // -- Interrupt pedaling : appel "isr_pas" sur signal CHANGE  
-    attachInterrupt(digitalPinToInterrupt(PAS_PIN), isr_pas, RISING);  
+    // -- Interrupt pedaling : appel "isr_pas" sur signal CHANGE (high or low)  
+    attachInterrupt(digitalPinToInterrupt(PAS_PIN), isr_pas, CHANGE);  
     
-    // debug
+    // debug const
     Serial.println(MS_TO_START);
     Serial.println(MS_SLOW);
     Serial.println(MS_FAST);
@@ -109,36 +111,50 @@ void setup() {
 
 void loop()
 {
-    unsigned long currentMillis = millis(); // init timer 
+    static uint32_t oldtime = millis(); // timer loop, static !
     
-    // Turn Off (check timeout, turn off if too long without signal)
-    if ((currentMillis > time_isr + 400) && ((currentMillis - time_isr) > 100)) {
-        turnOff();
-    }
+    // -- pedaling forward or backwards ? (verif si pedalage en avant ou en arriere) 
+    if (period_h >= period_l) ped_forward = true;
+    else ped_forward = false;
     
-    // Turn On only if ...
+    
+    // -- Turn On only if ...
     if (pulse > START_PULSES && period < MS_TO_START) {
-        turnOn();
+        if (ped_forward) turnOn(); // Turn On only if ped. forward (pedalage en avant !)
     }
     
+    // -- Timer loop: Check RPM, Turn Off if no pedalling, and debug Serial
+    uint32_t check_t = millis() - oldtime;
     
-    // timer loop  info RPM and debug Serial
-    long check_t = currentMillis - previousMillis;
-    
-    if (check_t >= SERIAL_INTERVAL) {
+    if (check_t >= SCAN_INTERVAL) {
         
-        rpm   = (pulse * COEFF_RPM) / check_t;
+        oldtime = millis();   // update timer loop    
+        
+        rpm = (pulse * COEFF_RPM) / check_t;
+        
         pulse = 0; // reset pulses
         
-        // debug
-        Serial.println(rpm);    // rpm pedalling
-        Serial.println(period); // period front to front, in ms
+        // Turn off if no pedaling ...
+        if (rpm == 0 || period == 0) {
+            turnOff();
+        }
         
-        //Serial.println(currentMillis);
-        //Serial.println(time_isr);
-        //Serial.println(currentMillis - time_isr);
-        
-        previousMillis = currentMillis; // reset timer loop
+        // debug info
+        /*
+        Serial.print("rpm= ");
+        Serial.println(rpm);      // rpm pedalling
+        Serial.print("tot period= ");
+        Serial.println(period);   // period tot, front to front, in ms
+        Serial.print("period high= ");
+        Serial.println(period_h); // period high, in ms
+        Serial.print("period low= ");
+        Serial.println(period_l); // period low, in ms
+        if (rpm > 0) {
+            if (ped_forward) Serial.println("ped. forward, OK !");
+            else Serial.println("ped. backward, no assist !");
+        }
+        Serial.println("---------------");
+        */
         
     } // endif
     
@@ -158,14 +174,22 @@ void loop()
 // -- ISR - interrupt PAS
 void isr_pas() {
     
-    // rester ici le plus concis possible !
-    time_isr = millis();                 // timer isr
+    // rester ici le plus concis possible 
+    uint32_t isr_time = millis();
     
-    period = (time_isr - lastTime);      // = ms entre 2 fronts
+    if (digitalRead(PAS_PIN) == HIGH) {
+        period_l = (isr_time - isr_oldtime);  // ms low (inverse)
+        
+        pulse++;          // increment nb de pulse (pour calcul rpm)    
+    }
+    else {
+        period_h = (isr_time - isr_oldtime);  // ms high (inverse)
+    }
     
-    if (period < MS_TO_START)  pulse++;  // increment pulse only if  ...
+    period = period_h + period_l;   // tot period
     
-    lastTime = time_isr ;                // reset timer
+    isr_oldtime = isr_time ;        // update timer interupt
+    
     
 } // endfunc
 
@@ -176,14 +200,16 @@ void turnOff() {
     // noInterrupts();
     detachInterrupt(digitalPinToInterrupt(PAS_PIN)); //  desactiver interrupt,  uniquement pin concernée
     
-    analogWrite(PWM_PIN, MIN_PWM);  
-    pulse  = 0;
-    period = 0;
-    
-    led_state = false;
+    pulse    = 0;
+    period   = 0;
+    period_h = 0;
+    period_l = 0;
     
     //interrupts();
-    attachInterrupt(digitalPinToInterrupt(PAS_PIN), isr_pas, RISING); // reactiver interruption
+    attachInterrupt(digitalPinToInterrupt(PAS_PIN), isr_pas, CHANGE);  
+    
+    analogWrite(PWM_PIN, MIN_PWM);  // PWM minimum  
+    led_state = false;
     
 } // endfunc
 
@@ -191,23 +217,23 @@ void turnOff() {
 // -- Turn on output and set state variable to true
 void turnOn() {
     
+    int pwm_out;    
     
     #if USE_PRPORTIONAL==0
-        int pwm_out = MAX_PWM;
+        pwm_out = MAX_PWM;
     #endif  
     
     #if USE_PRPORTIONAL==1 && INVERSE == 0
-        int pwm_out = map(period, MS_SLOW, MS_FAST, MIN_PWM, MAX_PWM);
+        pwm_out = map(period, MS_SLOW, MS_FAST, MIN_PWM, MAX_PWM);
         if (pwm_out > MAX_PWM) pwm_out=MAX_PWM; 
     #endif 
     
     #if USE_PRPORTIONAL==1 && INVERSE == 1
-        int pwm_out = map(period, MS_SLOW, MS_FAST, MAX_PWM, MIN_PWM);
+        pwm_out = map(period, MS_SLOW, MS_FAST, MAX_PWM, MIN_PWM);
         if (pwm_out > MAX_PWM) pwm_out=MAX_PWM; 
     #endif 
     
     analogWrite(PWM_PIN, pwm_out);
-    //analogWrite(PWM_PIN, MAX_PWM);
     led_state = true;
     
 } // endfunc
