@@ -43,8 +43,8 @@ const int THR_PIN = 0;   // -- THROTTLE A0 (if needed, not mandatory)
 const int  NB_MAGNETS =  6;     // How many magnets on PAS ?  (default 6)
 
 const float V_REF =     4.95;   // Arduino +5V pin reference (=PWM high level) - To test! (default 5.00)
-const float V_MIN_THR = 1.10;   // throttle min voltage (default 1.1V --- no push)
-const float V_MAX_THR = 3.50;   // throttle max voltage (default 3.5V --- full  push)
+const float V_MIN_THR = 1.10;   // throttle out min voltage (default 1.1V --- no push)
+const float V_MAX_THR = 3.50;   // throttle out max voltage (default 3.5V --- full  push)
 
 // thumb throttle (if instaled) --> ADC value, see debug Serial in loop !
 const int   TR_ADC_MIN    = 220;    // throttle min (no push) - marge ajoutee dans map()
