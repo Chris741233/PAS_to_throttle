@@ -46,10 +46,10 @@ const float V_REF =     4.95;   // Arduino +5V pin reference (=PWM high level) -
 const float V_MIN_THR = 1.10;   // throttle min voltage (default 1.1V --- no push)
 const float V_MAX_THR = 3.50;   // throttle max voltage (default 3.5V --- full  push)
 
-// throttle (if instaled) --> ADC value, see debug Serial in loop !
-const int   TR_ADC_MIN    = 220;    // throttle min - marge ajoutee dans map()
-const int   TR_ADC_MAX    = 856;    // throttle max - marge deduite dans map()
-const int TR_ADC_MARGIN   = 15;     // margin throttle before send signal PWM and as a deduction of TR_MAX
+// thumb throttle (if instaled) --> ADC value, see debug Serial in loop !
+const int   TR_ADC_MIN    = 220;    // throttle min (no push) - marge ajoutee dans map()
+const int   TR_ADC_MAX    = 856;    // throttle max (full push) - marge deduite dans map()
+const int TR_ADC_MARGIN   = 15;     // margin throttle before send signal PWM and as a deduction of TR_ADC_MAX
 
 const int  RPM_TO_START = 10;   // How many RPM to start assistance ? (with default 10, start is normally fast enough)
 // --> more rpm = less ms
