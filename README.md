@@ -23,6 +23,10 @@
   <img src="./PAS_to_throttle/img/diagram_PAS_to_throttle.jpg" width="700" title="Arduino pinouts">
 </p>
 
+<p align="left">
+  <img src="./PAS_to_throttle/img/diagram_PAS_to_throttle_2.jpg" width="300" title="Arduino pinouts">
+</p>
+
 ---
 
 #### Utilisation
