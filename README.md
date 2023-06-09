@@ -37,7 +37,7 @@ Régler les constantes en début de code \
 -- Setting ---
 #define USE_PROPORTIONAL    0   // use proportional assistance ? 1=yes, 0=no (if no, use only On-Off assistance with full PWM)
 #define INVERSE_ASSISTANCE  0   // if proportional, inverse assistance ? 1=yes, 0=no (if yes, slow pedaling = more assistance !)
-#define USE_THUMB_THROTTLE  0   // thumb throttle instaled (see diagram) ? 1=yes, 0=no (throttle priority on the PAS)
+#define USE_THUMB_THROTTLE  0   // thumb throttle is instaled (see diagram) ? 1=yes, 0=no (throttle priority on the PAS)
 
 const int  NB_MAGNETS =  6;     // How many magnets on PAS ?  (default 6)
 const float V_REF =     4.95;   // Arduino +5V pin reference (=PWM high level) - To test! (default 5.00)
