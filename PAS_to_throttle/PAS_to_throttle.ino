@@ -23,11 +23,6 @@ Description :  e-bike PAS to Throttle
 #include <RunningMedian.h>  // filtre median ou moyennage  https://github.com/RobTillaart/RunningMedian 
 
 
-// objet statistic median (median filter)
-const int NB_SAMPLE = 10;       // nb. sample median filter (default 10) for thumb throttle
-RunningMedian samples_throt = RunningMedian(NB_SAMPLE);  
-
-
 
 // -------- GPIO Arduino Uno/Nano --------------
 
@@ -87,6 +82,14 @@ const long COEFF_RPM = 60000 / NB_MAGNETS;               // 60000 / 6 magnets  =
 
 const long MS_SLOW = 60000 / RPM_MIN / NB_MAGNETS;       // for maping proportional value
 const long MS_FAST = 60000 / RPM_MAX / NB_MAGNETS;       // for maping proportional value
+
+
+
+// -------- INIT OBJETS -----------
+
+//  statistic median (median filter)
+const int NB_SAMPLE = 10;       // nb. sample median filter (default 10) for thumb throttle
+RunningMedian samples_throt = RunningMedian(NB_SAMPLE);  
 
 
 
