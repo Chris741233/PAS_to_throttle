@@ -35,9 +35,10 @@ Une entrée throttle/accélérateur sur le controleur est nécessaire (le cas é
 
 ---
 
-#### Utilisation
-Régler les constantes en début de code \
-*Adjust constants at the beginning of code*
+#### Usage
+*Adjust constants at the beginning of code*\
+Régler les constantes en début de code
+
 
 ```
 -- Setting ---
