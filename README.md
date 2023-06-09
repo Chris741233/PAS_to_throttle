@@ -1,9 +1,9 @@
 # E-bike PAS to throttle converter
 
+Allows you to install a PAS on e-bikes that do not have this port. For those who already have one managed by the controller, also makes it possible to make the starts much more responsive (!) and offers more possibilities of adjustments. A throttle/accelerator input on the controller is required (see also links below).
+
 Permet d'installer un PAS sur les e-bike ne possédant pas ce port. Pour ceux qui en ont déjà un géré par le controleur, permet également de rendre beaucoup plus réactif les démarages (!) et offre plus de possibilités de réglages.
 Une entrée throttle/accélérateur sur le controleur est nécessaire (voir aussi liens ci-dessous).
-
-Allows you to install a PAS on e-bikes that do not have this port. For those who already have one managed by the controller, also makes it possible to make the starts much more responsive (!) and offers more possibilities of adjustments. A throttle/accelerator input on the controller is required (see also links below).
 
 - Conversion de la sortie PAS vers l'entrée throttle (gachette / accélérateur).  
 - Possibilité d'utiliser ou non l'assistance proportionnelle en fonction de la vitesse de pédalage.  
