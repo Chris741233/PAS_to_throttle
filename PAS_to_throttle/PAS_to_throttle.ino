@@ -48,7 +48,7 @@ const int THR_PIN = 0;   // -- THROTTLE A0 (if needed, not mandatory)
 #define INVERSE_ASSISTANCE  0   // if proportional, inverse assistance ? 1=yes, 0=no (if yes, slow pedaling = more assistance !)
 // Si inverse, envois plus d'assistance en pédalage lent qu'en pedalage rapide !
 
-#define USE_THUMB_THROTTLE  0   // thumb throttle instaled ? 1=yes, 0=no (throttle priority on the PAS)
+#define USE_THUMB_THROTTLE  0   // thumb throttle instaled (see diagram) ? 1=yes, 0=no (throttle priority on the PAS !)
 
 const int  NB_MAGNETS =  6;     // How many magnets on PAS ?  (default 6)
 
