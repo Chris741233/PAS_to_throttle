@@ -37,7 +37,7 @@ Régler les constantes en début de code \
 -- Setting ---
 #define USE_PROPORTIONAL    0   // use proportional assistance ? 1=yes, 0=no (if no, use only On-Off assistance with full PWM)
 #define INVERSE_ASSISTANCE  0   // if proportional, inverse assistance ? 1=yes, 0=no (if yes, slow pedaling = more assistance !)
-#define USE_THUMB_THROTTLE  0   // thumb throttle instaled ? 1=yes, 0=no (throttle priority on the PAS)
+#define USE_THUMB_THROTTLE  0   // thumb throttle instaled (see diagram) ? 1=yes, 0=no (throttle priority on the PAS)
 
 const int  NB_MAGNETS =  6;     // How many magnets on PAS ?  (default 6)
 const float V_REF =     4.95;   // Arduino +5V pin reference (=PWM high level) - To test! (default 5.00)
@@ -46,7 +46,7 @@ const float V_MAX_THR = 3.50;   // throttle max voltage (default 3.5V --- full  
 
 // throttle (if instaled) --> ADC value, see debug Serial in loop !
 const int   TR_ADC_MIN    = 220;    // throttle min - marge ajoutee dans map()
-const int   TR_ADC_MAX    = 856;    // throttle max - marge deduite dans map()
+const int   TR_ADC_MAX    = 859;    // throttle max - marge deduite dans map()
 const int TR_ADC_MARGIN   = 15;     // margin throttle before send signal PWM and as a deduction of TR_MAX
 
 const int  RPM_TO_START = 10;   // How many RPM to start assistance ? (with default 10, start is normally fast enough)
