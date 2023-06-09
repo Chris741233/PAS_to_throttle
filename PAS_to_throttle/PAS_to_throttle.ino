@@ -18,6 +18,16 @@ Description :  e-bike PAS to Throttle
 
 ******************************************************************/
 
+// Install  librairy with Arduino IDE librairy manager or manual (see url)
+
+#include <RunningMedian.h>  // filtre median ou moyennage  https://github.com/RobTillaart/RunningMedian 
+
+
+// objet statistic median (median filter)
+const int NB_SAMPLE = 10;       // nb. sample median filter (default 10) for thumb throttle
+RunningMedian samples_throt = RunningMedian(NB_SAMPLE);  
+
+
 
 // -------- GPIO Arduino Uno/Nano --------------
 
@@ -48,7 +58,7 @@ const float V_MAX_THR = 3.50;   // throttle out max voltage (default 3.5V --- fu
 
 // thumb throttle (if instaled) --> ADC value, see debug Serial in loop !
 const int   TR_ADC_MIN    = 220;    // throttle min (no push) - marge ajoutee dans map()
-const int   TR_ADC_MAX    = 856;    // throttle max (full push) - marge deduite dans map()
+const int   TR_ADC_MAX    = 859;    // throttle max (full push) - marge deduite dans map()
 const int TR_ADC_MARGIN   = 15;     // margin throttle before send signal PWM and as a deduction of TR_ADC_MAX
 
 const int  RPM_TO_START = 10;   // How many RPM to start assistance ? (with default 10, start is normally fast enough)
@@ -132,21 +142,32 @@ void loop()
 {
     static uint32_t oldtime = millis(); // timer loop, static !
     
+    unsigned int val, val_median;
     
     // -- If instaled, read ADC thumb throttle --> throttle priority on the PAS !
     #if  USE_THUMB_THROTTLE == 1
-        int val = analogRead(THR_PIN);
+        
+        // add sample median filter (10x)
+        for(int i=0; i<=NB_SAMPLE-1; i++)
+        {
+            val = analogRead(THR_PIN);
+            samples_throt.add(val);
+        }
+        val_median = samples_throt.getMedian();
+        
         
         // re-map val throttle
-        int pwm_throttle = map(val, TR_ADC_MIN + TR_ADC_MARGIN, TR_ADC_MAX -TR_ADC_MARGIN, MIN_PWM, MAX_PWM);
+        int pwm_throttle = map(val_median, TR_ADC_MIN + TR_ADC_MARGIN, TR_ADC_MAX -TR_ADC_MARGIN, MIN_PWM, MAX_PWM);
         
-        if (val > TR_ADC_MIN + TR_ADC_MARGIN) {
+        if (val_median > TR_ADC_MIN + TR_ADC_MARGIN) {
             throt_on = true;
             analogWrite(PWM_PIN, pwm_throttle);  // PWM out
         }
         else {
             throt_on = false;
+            samples_throt.clear();  // reset median filter
         }
+        
     #endif
     // -- end thumb throttle
     
@@ -179,11 +200,11 @@ void loop()
         
         // -- debug val thumb throttle
         #if  USE_THUMB_THROTTLE == 1
-            /*
-            Serial.println(val);
-            Serial.println(throt_on);
-            Serial.println("---------------");
-            */
+
+            //Serial.println(val_median);
+            //Serial.println(throt_on);
+            //Serial.println("---------------");
+            
         #endif
         
         
